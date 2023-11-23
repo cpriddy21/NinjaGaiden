@@ -75,6 +75,7 @@ public class CharacterController2D : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.W) && isGrounded)
         {
             r2d.velocity = new Vector2(r2d.velocity.x, jumpHeight);
+            animator.SetTrigger("Jump");
         }
 
         // Camera follow
@@ -94,6 +95,9 @@ public class CharacterController2D : MonoBehaviour
         Collider2D[] colliders = Physics2D.OverlapCircleAll(groundCheckPos, colliderRadius);
         //Check if any of the overlapping colliders are not player collider, if so, set isGrounded to true
         isGrounded = false;
+        if(!isGrounded && Input.GetKeyDown(KeyCode.W)){
+            animator.SetBool("LedgeWait", true);
+        }
         if (colliders.Length > 0)
         {
             for (int i = 0; i < colliders.Length; i++)
@@ -101,6 +105,7 @@ public class CharacterController2D : MonoBehaviour
                 if (colliders[i] != mainCollider)
                 {
                     isGrounded = true;
+                    animator.SetBool("LedgeWait", false);
                     break;
                 }
             }
