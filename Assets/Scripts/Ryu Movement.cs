@@ -12,6 +12,7 @@ public class CharacterController2D : MonoBehaviour
     public float jumpHeight = 9.2f;
     public float gravityScale = 2.0f;
     public Camera mainCamera;
+    public Animator animator;
 
     bool facingRight = true;
     float moveDirection = 0;
@@ -54,6 +55,7 @@ public class CharacterController2D : MonoBehaviour
             }
         }
 
+        animator.SetFloat("Speed", Mathf.Abs(moveDirection));
         // Change facing direction
         if (moveDirection != 0)
         {
@@ -80,6 +82,7 @@ public class CharacterController2D : MonoBehaviour
         {
             mainCamera.transform.position = new Vector3(t.position.x, cameraPos.y, cameraPos.z);
         }
+        animator.SetBool("Jumping", !isGrounded);
     }
 
     void FixedUpdate()
@@ -103,9 +106,26 @@ public class CharacterController2D : MonoBehaviour
             }
         }
 
-        // Apply movement velocity
-        r2d.velocity = new Vector2((moveDirection) * maxSpeed, r2d.velocity.y);
-
+        // Apply movement velocity and crouching
+        if (!Input.GetKey(KeyCode.S))
+        {
+            r2d.velocity = new Vector2((moveDirection) * maxSpeed, r2d.velocity.y);
+            animator.SetBool("isCrouching", false);
+            animator.SetBool("isCrouchWalking", false);
+        }
+        else
+        {
+            r2d.velocity = new Vector2((moveDirection) * (maxSpeed/2), r2d.velocity.y);
+            if(moveDirection != 0){
+                animator.SetBool("isCrouching", false);
+                animator.SetBool("isCrouchWalking", true);
+            }
+            else
+            {
+                animator.SetBool("isCrouching", true);
+                animator.SetBool("isCrouchWalking", false);
+            }
+        }
         // Simple debug
         Debug.DrawLine(groundCheckPos, groundCheckPos - new Vector3(0, colliderRadius, 0), isGrounded ? Color.green : Color.red);
         Debug.DrawLine(groundCheckPos, groundCheckPos - new Vector3(colliderRadius, 0, 0), isGrounded ? Color.green : Color.red);
