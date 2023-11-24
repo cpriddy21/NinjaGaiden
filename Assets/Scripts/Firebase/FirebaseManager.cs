@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿//this is not a complete script and will be updated in Sprint 4
+//based off of tutorials provided by xzippyzachx on youtube
+
+using System.Collections;
 using UnityEngine;
 using Firebase;
 using Firebase.Auth;
@@ -33,6 +36,7 @@ public class FirebaseManager : MonoBehaviour
     public TMP_Text warningRegisterText;
 
     //User Data variables
+    //These are not final, they are stand ins from the tutorial I was following
     [Header("UserData")]
     public TMP_InputField usernameField;
     public TMP_InputField xpField;
@@ -167,7 +171,7 @@ public class FirebaseManager : MonoBehaviour
             confirmLoginText.text = "";
             ClearLoginFeilds();
             ClearRegisterFeilds();
-            //SceneManager.LoadScene("Level 1 Part 1");
+            //SceneManager.LoadScene("Level 1 Part 1"); <--- currently causes visual problems, functional but not user friendly
         }
     }
 
