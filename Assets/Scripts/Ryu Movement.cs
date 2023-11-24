@@ -14,6 +14,11 @@ public class CharacterController2D : MonoBehaviour
     public Camera mainCamera;
     public Animator animator;
 
+    //for ledgegrab
+    public Transform ledgeGrabPoint;
+    public float grabRange = 0.3f;
+    public LayerMask platformLayer;
+
     bool facingRight = true;
     float moveDirection = 0;
     bool isGrounded = false;
@@ -95,9 +100,6 @@ public class CharacterController2D : MonoBehaviour
         Collider2D[] colliders = Physics2D.OverlapCircleAll(groundCheckPos, colliderRadius);
         //Check if any of the overlapping colliders are not player collider, if so, set isGrounded to true
         isGrounded = false;
-        if(!isGrounded && Input.GetKeyDown(KeyCode.W)){
-            animator.SetBool("LedgeWait", true);
-        }
         if (colliders.Length > 0)
         {
             for (int i = 0; i < colliders.Length; i++)
@@ -105,7 +107,6 @@ public class CharacterController2D : MonoBehaviour
                 if (colliders[i] != mainCollider)
                 {
                     isGrounded = true;
-                    animator.SetBool("LedgeWait", false);
                     break;
                 }
             }
@@ -131,6 +132,20 @@ public class CharacterController2D : MonoBehaviour
                 animator.SetBool("isCrouchWalking", false);
             }
         }
+        /*ledge grab 
+        if (!isGrounded && Input.GetKeyDown(KeyCode.W))
+        {
+            Collider2D ledgeFound = Physics2D.OverlapCircleAll(ledgeGrabPoint.position, grabRange, platformLayer);
+
+            if (Collider2D ledgeFound in hitEnemies)
+            {
+                Debug.Log("Hit" + enemy.name);
+            }
+        }
+        else
+        {
+            animator.setBool("LedgeWait", false);
+        }*/
         // Simple debug
         Debug.DrawLine(groundCheckPos, groundCheckPos - new Vector3(0, colliderRadius, 0), isGrounded ? Color.green : Color.red);
         Debug.DrawLine(groundCheckPos, groundCheckPos - new Vector3(colliderRadius, 0, 0), isGrounded ? Color.green : Color.red);

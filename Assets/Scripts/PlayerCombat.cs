@@ -30,6 +30,7 @@ public class PlayerCombat : MonoBehaviour
         foreach(Collider2D enemy in hitEnemies)
         {
             Debug.Log("Hit" + enemy.name);
+            enemy.GetComponent<Enemy>().takeDamage();
         }
     }
     void crouchAttack()
