@@ -35,6 +35,7 @@ public class FirebaseManager : MonoBehaviour
     //User Data variables
     [Header("UserData")]
     public TMP_InputField usernameField;
+    public TMP_InputField presentScoreField;
     public TMP_InputField xpField;
     public TMP_InputField killsField;
     public TMP_InputField deathsField;
@@ -105,6 +106,7 @@ public class FirebaseManager : MonoBehaviour
         StartCoroutine(UpdateUsernameAuth(usernameField.text));
         StartCoroutine(UpdateUsernameDatabase(usernameField.text));
 
+        StartCoroutine(UpdatePresentScore(int.Parse(presentScoreField.text)));
         StartCoroutine(UpdateXp(int.Parse(xpField.text)));
         StartCoroutine(UpdateKills(int.Parse(killsField.text)));
         StartCoroutine(UpdateDeaths(int.Parse(deathsField.text)));
@@ -160,9 +162,9 @@ public class FirebaseManager : MonoBehaviour
             confirmLoginText.text = "Logged In";
             //StartCoroutine(LoadUserData());
 
-            yield return new WaitForSeconds(2);
+            yield return new WaitForSeconds(1);
 
-            //usernameField.text = User.DisplayName;
+            usernameField.text = User.DisplayName;
             UIManager.instance.UserDataScreen(); // Change to user data UI
             confirmLoginText.text = "";
             ClearLoginFeilds();
@@ -285,6 +287,24 @@ public class FirebaseManager : MonoBehaviour
         else
         {
             //Database username is now updated
+            Debug.Log("Database username updated");
+        }
+    }
+
+    private IEnumerator UpdatePresentScore(int _presentScore)
+    {
+        //Set the currently logged in user presentScore
+        Task DBTask = DBreference.Child("users").Child(User.UserId).Child("presentScore").SetValueAsync(_presentScore);
+
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+
+        if (DBTask.Exception != null)
+        {
+            Debug.LogWarning(message: $"Failed to register task with {DBTask.Exception}");
+        }
+        else
+        {
+            //presentScore is now updated
         }
     }
 
@@ -353,6 +373,7 @@ public class FirebaseManager : MonoBehaviour
         else if (DBTask.Result.Value == null)
         {
             //No data exists yet
+            presentScoreField.text = "0";
             xpField.text = "0";
             killsField.text = "0";
             deathsField.text = "0";
@@ -362,6 +383,7 @@ public class FirebaseManager : MonoBehaviour
             //Data has been retrieved
             DataSnapshot snapshot = DBTask.Result;
 
+            presentScoreField.text = snapshot.Child("presentScore").Value.ToString();
             xpField.text = snapshot.Child("xp").Value.ToString();
             killsField.text = snapshot.Child("kills").Value.ToString();
             deathsField.text = snapshot.Child("deaths").Value.ToString();
@@ -381,30 +403,37 @@ public class FirebaseManager : MonoBehaviour
         }
         else
         {
+            if (DBTask.Result != null) {
+                DataSnapshot snapshot = DBTask.Result;
+
+                //Destroy any existing scoreboard elements
+                foreach (Transform child in scoreboardContent.transform)
+                {
+                    Destroy(child.gameObject);
+                }
+
+                //Loop through every users UID
+                foreach (DataSnapshot childSnapshot in snapshot.Children.Reverse<DataSnapshot>())
+                {
+                    string username = childSnapshot.Child("username").Value.ToString();
+                    int kills = int.Parse(childSnapshot.Child("kills").Value.ToString());
+                    int deaths = int.Parse(childSnapshot.Child("deaths").Value.ToString());
+                    int xp = int.Parse(childSnapshot.Child("xp").Value.ToString());
+                    int presentScore = int.Parse(childSnapshot.Child("presentScore").Value.ToString());
+
+                    //Instantiate new scoreboard elements
+                    GameObject scoreboardElement = Instantiate(scoreElement, scoreboardContent);
+                    Debug.Log("Score Element: " + scoreElement);
+                    scoreboardElement.GetComponent<ScoreElement>().NewScoreElement(username, presentScore, kills, deaths, xp); //line 404
+                }
+
+                //Go to scoareboard screen
+                UIManager.instance.ScoreboardScreen();
+            } else {
+                Debug.LogError("DBTask.Result is null");
+            }
             //Data has been retrieved
-            DataSnapshot snapshot = DBTask.Result;
-
-            //Destroy any existing scoreboard elements
-            foreach (Transform child in scoreboardContent.transform)
-            {
-                Destroy(child.gameObject);
-            }
-
-            //Loop through every users UID
-            foreach (DataSnapshot childSnapshot in snapshot.Children.Reverse<DataSnapshot>())
-            {
-                string username = childSnapshot.Child("username").Value.ToString();
-                int kills = int.Parse(childSnapshot.Child("kills").Value.ToString());
-                int deaths = int.Parse(childSnapshot.Child("deaths").Value.ToString());
-                int xp = int.Parse(childSnapshot.Child("xp").Value.ToString());
-
-                //Instantiate new scoreboard elements
-                GameObject scoreboardElement = Instantiate(scoreElement, scoreboardContent);
-                scoreboardElement.GetComponent<ScoreElement>().NewScoreElement(username, kills, deaths, xp);
-            }
-
-            //Go to scoareboard screen
-            UIManager.instance.ScoreboardScreen();
+            
         }
     }
 }
