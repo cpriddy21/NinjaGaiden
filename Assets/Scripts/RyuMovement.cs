@@ -71,7 +71,7 @@ public class CharacterController2D : MonoBehaviour
             gameObject.GetComponent<CapsuleCollider2D>().isTrigger = true;
         }*/
         // Movement controls
-        if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) && (isGrounded || Mathf.Abs(r2d.velocity.x) > 0.01f))
+        if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) /*&& (isGrounded || Mathf.Abs(r2d.velocity.x) > 0.01f)*/)
         {
             moveDirection = Input.GetKey(KeyCode.A) ? -1 : 1;
         }
