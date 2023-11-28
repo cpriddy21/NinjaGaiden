@@ -9,6 +9,10 @@ public class UIInformation : MonoBehaviour
     public GameObject timer;
     TextMeshProUGUI timerReadout;
 
+    int scorePoints;
+    public GameObject score;
+    TextMeshProUGUI scoreReadout;
+
     int ryuHealth;
     int shurikens;
     int power;
@@ -17,8 +21,13 @@ public class UIInformation : MonoBehaviour
     {
         timerSeconds = 300;
         timerReadout = timer.GetComponent<TextMeshProUGUI>();
+    
+        scorePoints = 0;
+        scoreReadout = score.GetComponent<TextMeshProUGUI>();
+        updateScore(100);
+        
         InvokeRepeating("timerTiming", 0, 1.0f);
-        Debug.Log(timerSeconds);
+        
     }
 
     // Update is called once per frame
@@ -31,6 +40,22 @@ public class UIInformation : MonoBehaviour
     {
         timerSeconds = timerSeconds - 1;
         timerReadout.text = timerSeconds.ToString();
-        Debug.Log(timerSeconds);
+        
+    }
+
+    void updateScore(int points) {
+        scorePoints = scorePoints + points;
+    
+        string s = scorePoints.ToString();
+
+        for(int i = s.Length; i < 8; i++){
+            s = "0" + s;
+        }
+
+        Debug.Log(s);
+        
+        scoreReadout.text = s;
+
+        Debug.Log(scoreReadout.text);
     }
 }
