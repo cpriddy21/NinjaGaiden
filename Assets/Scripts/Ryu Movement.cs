@@ -1,6 +1,7 @@
-using System.Collections;
+fusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using 
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(CapsuleCollider2D))]
@@ -32,6 +33,13 @@ public class CharacterController2D : MonoBehaviour
     public float KBTotalTime;
     public bool KBRight;
     public int playerHealth = 20;
+    public int lives = 3;
+
+    //connecting to UI
+    public gameObject health;
+    TextMeshProUGUI healthReadout;
+    public gameObject lives;
+    TextMeshProUGUI livesReadout;
 
     // Use this for initialization
     void Start()
@@ -47,6 +55,12 @@ public class CharacterController2D : MonoBehaviour
         {
             cameraPos = mainCamera.transform.position;
         }
+
+        
+        healthReadout = score.GetComponent<TextMeshProUGUI>();
+        updateHealth(0);
+        livesReadout = score..GetComponent<TextMeshProUGUI>();
+        updateLives();
 
     }
 
@@ -202,5 +216,15 @@ public class CharacterController2D : MonoBehaviour
                 //add here later
             }
         }
+    }
+
+    public void updateHealth(int damage) {
+        playerHealth = playerHealth - damage;
+        
+    }
+
+    public void updateLives() {
+        lives = lives - 1;
+        livesReadout.text = lives.ToString();
     }
 }
