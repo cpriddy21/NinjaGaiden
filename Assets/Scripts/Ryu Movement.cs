@@ -12,6 +12,11 @@ public class CharacterController2D : MonoBehaviour
     public float jumpHeight = 9.2f;
     public float gravityScale = 2.0f;
     public Camera mainCamera;
+    public Animator animator;
+    //for ledgegrab
+    public Transform ledgeGrabPoint;
+    public float grabRange = 0.3f;
+    public LayerMask platformLayer;
 
     bool facingRight = true;
     float moveDirection = 0;
@@ -20,6 +25,13 @@ public class CharacterController2D : MonoBehaviour
     Rigidbody2D r2d;
     CapsuleCollider2D mainCollider;
     Transform t;
+
+    //knockback and damage
+    public float KBForce;
+    public float KBCounter;
+    public float KBTotalTime;
+    public bool KBRight;
+    public int playerHealth = 20;
 
     // Use this for initialization
     void Start()
@@ -31,16 +43,28 @@ public class CharacterController2D : MonoBehaviour
         r2d.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         r2d.gravityScale = gravityScale;
         facingRight = t.localScale.x > 0;
-
         if (mainCamera)
         {
             cameraPos = mainCamera.transform.position;
         }
+
     }
 
     // Update is called once per frame
     void Update()
     {
+        if(KBCounter < 0)
+        {
+            KBCounter = 0;
+        }
+        /*if(KBCounter != 0) 
+        {
+            gameObject.GetComponent<CapsuleCollider2D>().isTrigger = false;
+        }
+        else
+        {
+            gameObject.GetComponent<CapsuleCollider2D>().isTrigger = true;
+        }*/
         // Movement controls
         if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) && (isGrounded || Mathf.Abs(r2d.velocity.x) > 0.01f))
         {
@@ -53,7 +77,7 @@ public class CharacterController2D : MonoBehaviour
                 moveDirection = 0;
             }
         }
-
+        animator.SetFloat("Speed", Mathf.Abs(moveDirection));
         // Change facing direction
         if (moveDirection != 0)
         {
@@ -73,13 +97,16 @@ public class CharacterController2D : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.W) && isGrounded)
         {
             r2d.velocity = new Vector2(r2d.velocity.x, jumpHeight);
+            animator.SetTrigger("Jump");
         }
 
         // Camera follow
         if (mainCamera)
         {
-            mainCamera.transform.position = new Vector3(t.position.x, cameraPos.y, cameraPos.z);
+            //mainCamera.transform.position = new Vector3(t.position.x, cameraPos.y, cameraPos.z);
+            mainCamera.transform.position = new Vector3(t.position.x, (t.position.y+2), cameraPos.z);
         }
+        animator.SetBool("Jumping", !isGrounded);
     }
 
     void FixedUpdate()
@@ -103,11 +130,77 @@ public class CharacterController2D : MonoBehaviour
             }
         }
 
-        // Apply movement velocity
-        r2d.velocity = new Vector2((moveDirection) * maxSpeed, r2d.velocity.y);
+        // Apply movement velocity and crouching
+        if (KBCounter <= 0)
+        {
+            if (!Input.GetKey(KeyCode.S) && KBCounter == 0)
+            {
+                r2d.velocity = new Vector2((moveDirection) * maxSpeed, r2d.velocity.y);
+                animator.SetBool("isCrouching", false);
+                animator.SetBool("isCrouchWalking", false);
+            }
+            else
+            {
+                if (KBCounter == 0)
+                {
 
-        // Simple debug
-        Debug.DrawLine(groundCheckPos, groundCheckPos - new Vector3(0, colliderRadius, 0), isGrounded ? Color.green : Color.red);
-        Debug.DrawLine(groundCheckPos, groundCheckPos - new Vector3(colliderRadius, 0, 0), isGrounded ? Color.green : Color.red);
+
+                    r2d.velocity = new Vector2((moveDirection) * (maxSpeed / 2), r2d.velocity.y);
+                    if (moveDirection != 0)
+                    {
+                        animator.SetBool("isCrouching", false);
+                        animator.SetBool("isCrouchWalking", true);
+                    }
+                    else
+                    {
+                        animator.SetBool("isCrouching", true);
+                        animator.SetBool("isCrouchWalking", false);
+                    }
+                }
+            }
+        }
+        else
+        {
+            if(KBRight == true)
+            {
+                r2d.velocity = new Vector2(KBForce, KBForce/2);
+            }
+            else
+            {
+                r2d.velocity = new Vector2(-KBForce, KBForce/2);
+            }
+            if(isGrounded == true)
+            {
+                KBCounter = 0;
+            }
+            else
+            {
+                KBCounter -= Time.deltaTime; 
+            }
+        }
+    }
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "Enemy" && KBCounter == 0)
+        {
+            r2d.velocity = new Vector2(0, 0);
+            animator.SetTrigger("damage");
+            Debug.Log("Ryu has been hit");
+            KBCounter = KBTotalTime;
+            if (transform.position.x >= collision.transform.position.x) {
+            Debug.Log("kb right");
+            KBRight = true;
+            }
+            if (transform.position.x <= collision.transform.position.x)
+            {
+            KBRight = false;
+            Debug.Log("kb not right");
+            }
+            playerHealth--;
+            if (playerHealth == 0)
+            {
+                //add here later
+            }
+        }
     }
 }
