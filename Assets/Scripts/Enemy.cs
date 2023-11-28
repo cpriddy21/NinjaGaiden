@@ -28,7 +28,7 @@ public class Enemy : MonoBehaviour
     void Die()
     {
     GetComponent<Collider2D>().enabled = false;
-    this.enabled = false;
+    //this.enabled = false;
     obj.SetActive(false);
     }
 }
