@@ -43,7 +43,7 @@ public class UIInformation : MonoBehaviour
         
     }
 
-    void updateScore(int points) {
+    public void updateScore(int points) {
         scorePoints = scorePoints + points;
     
         string s = scorePoints.ToString();
