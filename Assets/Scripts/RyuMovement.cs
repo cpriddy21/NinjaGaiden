@@ -26,6 +26,9 @@ public class CharacterController2D : MonoBehaviour
     CapsuleCollider2D mainCollider;
     Transform t;
 
+    //camera
+    public static bool lockY;
+    public static float yLoc;
     //knockback and damage
     public float KBForce;
     public float KBCounter;
@@ -46,6 +49,8 @@ public class CharacterController2D : MonoBehaviour
         if (mainCamera)
         {
             cameraPos = mainCamera.transform.position;
+            lockY = true;
+            yLoc = cameraPos.y;
         }
 
     }
@@ -103,8 +108,14 @@ public class CharacterController2D : MonoBehaviour
         // Camera follow
         if (mainCamera)
         {
-            //mainCamera.transform.position = new Vector3(t.position.x, cameraPos.y, cameraPos.z);
-            mainCamera.transform.position = new Vector3(t.position.x, (t.position.y+2), cameraPos.z);
+            if (lockY == true)
+            {
+                mainCamera.transform.position = new Vector3(t.position.x, yLoc, cameraPos.z);
+            }
+            else
+            {
+                mainCamera.transform.position = new Vector3(t.position.x, t.position.y + 3, cameraPos.z);
+            }
         }
         animator.SetBool("Jumping", !isGrounded);
     }
