@@ -26,12 +26,18 @@ public class CharacterController2D : MonoBehaviour
     CapsuleCollider2D mainCollider;
     Transform t;
 
+    //camera
+    public static bool lockY;
+    public static float yLoc;
     //knockback and damage
     public float KBForce;
     public float KBCounter;
     public float KBTotalTime;
     public bool KBRight;
     public int playerHealth = 20;
+
+    public GameObject HUD;
+    public UIInformation uiInformation;
 
     // Use this for initialization
     void Start()
@@ -46,8 +52,11 @@ public class CharacterController2D : MonoBehaviour
         if (mainCamera)
         {
             cameraPos = mainCamera.transform.position;
+            lockY = true;
+            yLoc = cameraPos.y;
         }
 
+        uiInformation = HUD.GetComponent<UIInformation>();
     }
 
     // Update is called once per frame
@@ -66,7 +75,7 @@ public class CharacterController2D : MonoBehaviour
             gameObject.GetComponent<CapsuleCollider2D>().isTrigger = true;
         }*/
         // Movement controls
-        if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) && (isGrounded || Mathf.Abs(r2d.velocity.x) > 0.01f))
+        if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) /*&& (isGrounded || Mathf.Abs(r2d.velocity.x) > 0.01f)*/)
         {
             moveDirection = Input.GetKey(KeyCode.A) ? -1 : 1;
         }
@@ -103,10 +112,26 @@ public class CharacterController2D : MonoBehaviour
         // Camera follow
         if (mainCamera)
         {
-            //mainCamera.transform.position = new Vector3(t.position.x, cameraPos.y, cameraPos.z);
-            mainCamera.transform.position = new Vector3(t.position.x, (t.position.y+2), cameraPos.z);
+            if (lockY == true)
+            {
+                mainCamera.transform.position = new Vector3(t.position.x, yLoc, cameraPos.z);
+            }
+            else
+            {
+                mainCamera.transform.position = new Vector3(t.position.x, t.position.y + 3, cameraPos.z);
+            }
         }
         animator.SetBool("Jumping", !isGrounded);
+
+
+        if(t.position.y < -22) {
+            uiInformation.updateHealth(20);
+            
+            playerHealth = 20;
+
+            t.position = new Vector2(-5f,-3f);
+            r2d.velocity = new Vector3(0f,0f,0f);
+        }
     }
 
     void FixedUpdate()
@@ -196,9 +221,14 @@ public class CharacterController2D : MonoBehaviour
             KBRight = false;
             Debug.Log("kb not right");
             }
-            playerHealth--;
+            playerHealth = playerHealth - 2;
+            uiInformation.updateHealth(2);
             if (playerHealth == 0)
             {
+                playerHealth = 20;
+
+                t.position = new Vector2(-5f,-3f);
+                r2d.velocity = new Vector3(0f,0f,0f);
                 //add here later
             }
         }

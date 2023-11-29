@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 public class UIInformation : MonoBehaviour
@@ -13,7 +14,13 @@ public class UIInformation : MonoBehaviour
     public GameObject score;
     TextMeshProUGUI scoreReadout;
 
-    int ryuHealth;
+    int ryuHealth = 20;
+    public Slider health;
+    
+    int livesNum = 3;
+    public GameObject lives;
+    TextMeshProUGUI livesReadout;
+
     int shurikens;
     int power;
     // Start is called before the first frame update
@@ -25,6 +32,8 @@ public class UIInformation : MonoBehaviour
         scorePoints = 0;
         scoreReadout = score.GetComponent<TextMeshProUGUI>();
         updateScore(100);
+
+        livesReadout = lives.GetComponent<TextMeshProUGUI>();
         
         InvokeRepeating("timerTiming", 0, 1.0f);
         
@@ -43,7 +52,22 @@ public class UIInformation : MonoBehaviour
         
     }
 
-    void updateScore(int points) {
+    public void loseLife(){
+        livesNum = livesNum - 1;
+        livesReadout.text = livesNum.ToString();
+    }
+
+    public void updateHealth(int damage) {
+        ryuHealth = ryuHealth - damage;
+
+        if(ryuHealth <= 0) {
+            ryuHealth = 20;
+            loseLife();
+        }     
+        health.value = ryuHealth;
+    }
+
+    public void updateScore(int points) {
         scorePoints = scorePoints + points;
     
         string s = scorePoints.ToString();
