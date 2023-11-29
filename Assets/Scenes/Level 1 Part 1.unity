@@ -1861,6 +1861,8 @@ MonoBehaviour:
   KBTotalTime: 0.375
   KBRight: 0
   playerHealth: 20
+  HUD: {fileID: 829425223}
+  uiInformation: {fileID: 0}
 --- !u!70 &131289361
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -10672,6 +10674,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timer: {fileID: 304002758}
   score: {fileID: 788180456}
+  health: {fileID: 1750421911}
+  lives: {fileID: 1648330069}
 --- !u!1 &850436490
 GameObject:
   m_ObjectHideFlags: 0

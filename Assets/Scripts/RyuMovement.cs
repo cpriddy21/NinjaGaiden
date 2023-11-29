@@ -36,6 +36,9 @@ public class CharacterController2D : MonoBehaviour
     public bool KBRight;
     public int playerHealth = 20;
 
+    public GameObject HUD;
+    public UIInformation uiInformation;
+
     // Use this for initialization
     void Start()
     {
@@ -53,6 +56,7 @@ public class CharacterController2D : MonoBehaviour
             yLoc = cameraPos.y;
         }
 
+        uiInformation = HUD.GetComponent<UIInformation>();
     }
 
     // Update is called once per frame
@@ -118,6 +122,16 @@ public class CharacterController2D : MonoBehaviour
             }
         }
         animator.SetBool("Jumping", !isGrounded);
+
+
+        if(t.position.y < -22) {
+            uiInformation.updateHealth(20);
+            
+            playerHealth = 20;
+
+            t.position = new Vector2(-5f,-3f);
+            r2d.velocity = new Vector3(0f,0f,0f);
+        }
     }
 
     void FixedUpdate()
@@ -207,9 +221,14 @@ public class CharacterController2D : MonoBehaviour
             KBRight = false;
             Debug.Log("kb not right");
             }
-            playerHealth--;
+            playerHealth = playerHealth - 2;
+            uiInformation.updateHealth(2);
             if (playerHealth == 0)
             {
+                playerHealth = 20;
+
+                t.position = new Vector2(-5f,-3f);
+                r2d.velocity = new Vector3(0f,0f,0f);
                 //add here later
             }
         }
