@@ -12,6 +12,7 @@ public class UIManager : MonoBehaviour
     public GameObject registerUI;
     public GameObject userDataUI;
     public GameObject scoreboardUI;
+    public GameObject clearUI;
 
     private void Awake()
     {
@@ -26,7 +27,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-public void ClearScreen() //Turn off all screens
+    public void ClearScreen() //Turn off all screens
     {
         loginUI.SetActive(false);
         registerUI.SetActive(false);
@@ -56,5 +57,6 @@ public void ClearScreen() //Turn off all screens
         ClearScreen();
         scoreboardUI.SetActive(true);
     }
+
 }
 

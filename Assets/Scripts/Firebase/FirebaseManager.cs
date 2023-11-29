@@ -36,9 +36,6 @@ public class FirebaseManager : MonoBehaviour
     [Header("UserData")]
     public TMP_InputField usernameField;
     public TMP_InputField presentScoreField;
-    public TMP_InputField xpField;
-    public TMP_InputField killsField;
-    public TMP_InputField deathsField;
     public GameObject scoreElement;
     public Transform scoreboardContent;
 
@@ -86,6 +83,13 @@ public class FirebaseManager : MonoBehaviour
         //Call the login coroutine passing the email and password
         StartCoroutine(Login(emailLoginField.text, passwordLoginField.text));
     }
+
+    public void PlayButton()
+    {
+        //Call the login coroutine passing the email and password
+        StartCoroutine(Play());
+    }
+
     //Function for the register button
     public void RegisterButton()
     {
@@ -105,11 +109,8 @@ public class FirebaseManager : MonoBehaviour
     {
         StartCoroutine(UpdateUsernameAuth(usernameField.text));
         StartCoroutine(UpdateUsernameDatabase(usernameField.text));
-
+        print(presentScoreField.text);
         StartCoroutine(UpdatePresentScore(int.Parse(presentScoreField.text)));
-        StartCoroutine(UpdateXp(int.Parse(xpField.text)));
-        StartCoroutine(UpdateKills(int.Parse(killsField.text)));
-        StartCoroutine(UpdateDeaths(int.Parse(deathsField.text)));
     }
     //Function for the scoreboard button
     public void ScoreboardButton()
@@ -166,11 +167,19 @@ public class FirebaseManager : MonoBehaviour
 
             usernameField.text = User.DisplayName;
             UIManager.instance.UserDataScreen(); // Change to user data UI
+            //UIManager.instance.ScoreboardScreen();
             confirmLoginText.text = "";
             ClearLoginFeilds();
             ClearRegisterFeilds();
             //SceneManager.LoadScene("Level 1 Part 1");
         }
+    }
+
+    private IEnumerator Play()
+    {
+      UIManager.instance.ClearScreen();
+      SceneManager.LoadScene("Level 1 Part 1");  
+      yield return null;
     }
 
     private IEnumerator Register(string _email, string _password, string _username)
@@ -308,56 +317,6 @@ public class FirebaseManager : MonoBehaviour
         }
     }
 
-    private IEnumerator UpdateXp(int _xp)
-    {
-        //Set the currently logged in user xp
-        Task DBTask = DBreference.Child("users").Child(User.UserId).Child("xp").SetValueAsync(_xp);
-
-        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
-
-        if (DBTask.Exception != null)
-        {
-            Debug.LogWarning(message: $"Failed to register task with {DBTask.Exception}");
-        }
-        else
-        {
-            //Xp is now updated
-        }
-    }
-
-    private IEnumerator UpdateKills(int _kills)
-    {
-        //Set the currently logged in user kills
-        Task DBTask = DBreference.Child("users").Child(User.UserId).Child("kills").SetValueAsync(_kills);
-
-        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
-
-        if (DBTask.Exception != null)
-        {
-            Debug.LogWarning(message: $"Failed to register task with {DBTask.Exception}");
-        }
-        else
-        {
-            //Kills are now updated
-        }
-    }
-
-    private IEnumerator UpdateDeaths(int _deaths)
-    {
-        //Set the currently logged in user deaths
-        Task DBTask = DBreference.Child("users").Child(User.UserId).Child("deaths").SetValueAsync(_deaths);
-
-        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
-
-        if (DBTask.Exception != null)
-        {
-            Debug.LogWarning(message: $"Failed to register task with {DBTask.Exception}");
-        }
-        else
-        {
-            //Deaths are now updated
-        }
-    }
 
     private IEnumerator LoadUserData()
     {
@@ -374,9 +333,6 @@ public class FirebaseManager : MonoBehaviour
         {
             //No data exists yet
             presentScoreField.text = "0";
-            xpField.text = "0";
-            killsField.text = "0";
-            deathsField.text = "0";
         }
         else
         {
@@ -384,16 +340,13 @@ public class FirebaseManager : MonoBehaviour
             DataSnapshot snapshot = DBTask.Result;
 
             presentScoreField.text = snapshot.Child("presentScore").Value.ToString();
-            xpField.text = snapshot.Child("xp").Value.ToString();
-            killsField.text = snapshot.Child("kills").Value.ToString();
-            deathsField.text = snapshot.Child("deaths").Value.ToString();
         }
     }
 
     private IEnumerator LoadScoreboardData()
     {
         //Get all the users data ordered by kills amount
-        Task<DataSnapshot> DBTask = DBreference.Child("users").OrderByChild("kills").GetValueAsync();
+        Task<DataSnapshot> DBTask = DBreference.Child("users").OrderByChild("presentScore").GetValueAsync();
 
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
 
@@ -416,15 +369,13 @@ public class FirebaseManager : MonoBehaviour
                 foreach (DataSnapshot childSnapshot in snapshot.Children.Reverse<DataSnapshot>())
                 {
                     string username = childSnapshot.Child("username").Value.ToString();
-                    int kills = int.Parse(childSnapshot.Child("kills").Value.ToString());
-                    int deaths = int.Parse(childSnapshot.Child("deaths").Value.ToString());
-                    int xp = int.Parse(childSnapshot.Child("xp").Value.ToString());
+                    
                     int presentScore = int.Parse(childSnapshot.Child("presentScore").Value.ToString());
 
                     //Instantiate new scoreboard elements
                     GameObject scoreboardElement = Instantiate(scoreElement, scoreboardContent);
                     Debug.Log("Score Element: " + scoreElement);
-                    scoreboardElement.GetComponent<ScoreElement>().NewScoreElement(username, presentScore, kills, deaths, xp); //line 404
+                    scoreboardElement.GetComponent<ScoreElement>().NewScoreElement(username, presentScore); //line 404
                 }
 
                 //Go to scoareboard screen
